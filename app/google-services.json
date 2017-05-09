@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "459104908968",
+    "firebase_url": "https://stylishchat-16bf4.firebaseio.com",
+    "project_id": "stylishchat-16bf4",
+    "storage_bucket": "stylishchat-16bf4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:459104908968:android:8a6f9256d43aa1e2",
+        "android_client_info": {
+          "package_name": "com.example.rafal.stylishchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "459104908968-26d15psclht0esjj783l1h4dtj31lo3d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rafal.stylishchat",
+            "certificate_hash": "24ef59d3e21b9cb9f32f5cd967dac945ca86ce33"
+          }
+        },
+        {
+          "client_id": "459104908968-h1ctfbfs3jb9c05cobsim51dd58use3v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4VsGe2PO8C20Gc6UoepvBDT-rOYiM11w"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "459104908968-h1ctfbfs3jb9c05cobsim51dd58use3v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
