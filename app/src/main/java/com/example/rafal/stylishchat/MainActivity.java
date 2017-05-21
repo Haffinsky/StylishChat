@@ -38,8 +38,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-        private static final String TAG = "MainActivity";
-
         public static final String ANONYMOUS = "anonymous";
         public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
         public static final int RC_SIGN_IN = 1;
@@ -78,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             mPhotoPickerButton = (ImageButton) findViewById(R.id.photoPickerButton);
             mMessageEditText = (EditText) findViewById(R.id.messageEditText);
             mSendButton = (Button) findViewById(R.id.sendButton);
-
+            
             // Initialize message ListView and its adapter
             List<Message> messages = new ArrayList<>();
             mMessageAdapter = new MessageAdapter(this, R.layout.message, messages);
@@ -86,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
 
             // Initialize progress bar
             mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-
             // ImagePickerButton shows an image picker to upload a image for a message
             mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -178,8 +175,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             });
                 }
-            }
-        
+           }
 
         @Override
         public boolean onCreateOptionsMenu(Menu menu) {
@@ -231,20 +227,13 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                    }
-
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
                     @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-                    }
-
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {}
                     @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                    }
-
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                    }
+                    public void onCancelled(DatabaseError databaseError) {}
                 };
                 mDatabaseReference.addChildEventListener(mChildEventListener);
             }
