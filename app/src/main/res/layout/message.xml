@@ -3,9 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginLeft="@dimen/activity_horizontal_margin"
     android:layout_marginStart="@dimen/activity_horizontal_margin"
+    android:layout_marginTop="@dimen/margin_top_bottom"
+    android:layout_marginBottom="@dimen/margin_top_bottom"
     android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/nameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:textSize="@dimen/name_size"
+        tools:text="Name" />
 
     <ImageView
         android:id="@+id/photoImageView"
@@ -13,18 +24,18 @@
         android:layout_height="wrap_content"
         android:adjustViewBounds="true" />
 
-    <TextView
+    <com.apg.mobile.roundtextview.RoundTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:paddingLeft="16dp"
+        android:textSize="@dimen/text_size"
         android:id="@+id/messageTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        tools:text="Message" />
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        android:textColor="#fff"
+        app:allCorner="16dp"
+        app:bgColor="#456432" />
 
-    <TextView
-        android:id="@+id/nameTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        tools:text="Name" />
 
 </LinearLayout>

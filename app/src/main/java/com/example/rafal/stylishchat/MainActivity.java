@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -20,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -28,6 +31,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -42,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
         public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
         public static final int RC_SIGN_IN = 1;
         private static final int RC_PHOTO_PICKER =  2;
-        private ListView mMessageListView;
-        private MessageAdapter mMessageAdapter;
         private ProgressBar mProgressBar;
         private ImageButton mPhotoPickerButton;
         private EditText mMessageEditText;
@@ -57,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
         private FirebaseStorage mFirebaseStorage;
         private StorageReference mChatPhotosStorageReference;
 
+        private RecyclerView mMessageRecyclerView;
+        private FirebaseRecyclerAdapter mFirebaseRecyclerAdapter;
+        private LinearLayoutManager mLinearLayoutManager;
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -70,21 +75,14 @@ public class MainActivity extends AppCompatActivity {
 
             mChatPhotosStorageReference = mFirebaseStorage.getReference().child("chat_photos");
             mDatabaseReference = mfirebaseDatabase.getReference().child("messages");
-            // Initialize references to views
             mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-            mMessageListView = (ListView) findViewById(R.id.messageListView);
+
             mPhotoPickerButton = (ImageButton) findViewById(R.id.photoPickerButton);
             mMessageEditText = (EditText) findViewById(R.id.messageEditText);
             mSendButton = (Button) findViewById(R.id.sendButton);
-            
-            // Initialize message ListView and its adapter
-            List<Message> messages = new ArrayList<>();
-            mMessageAdapter = new MessageAdapter(this, R.layout.message, messages);
-            mMessageListView.setAdapter(mMessageAdapter);
 
-            // Initialize progress bar
             mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-            // ImagePickerButton shows an image picker to upload a image for a message
+
             mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -95,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            // Enable Send button when there's text to send
             mMessageEditText.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -124,10 +121,48 @@ public class MainActivity extends AppCompatActivity {
                     Message message = new Message(mMessageEditText.getText().toString(), mUsername, null);
                     // Clear input box
                     mDatabaseReference.push().setValue(message);
-
                     mMessageEditText.setText("");
                 }
             });
+
+            //Initialize recycler view and adapter
+            mMessageRecyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
+            mFirebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>(Message.class, R.layout.message, MessageViewHolder.class, mDatabaseReference) {
+                @Override
+                protected void populateViewHolder(MessageViewHolder viewHolder, Message model, int position) {
+                    Message message = getItem(position);
+                    viewHolder.setAuthorName(message.getName());
+                    boolean isPhoto = message.getPhotoUrl() != null;
+                    if (isPhoto) {
+                        viewHolder.setPhoto(message.getPhotoUrl());
+                    } else {
+                        viewHolder.setText(message.getText());
+                    }
+                }
+            };
+
+            mFirebaseRecyclerAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                @Override
+                public void onItemRangeInserted(int positionStart, int itemCount) {
+                    super.onItemRangeInserted(positionStart, itemCount);
+                    int messageCount = mFirebaseRecyclerAdapter.getItemCount();
+                    int lastVisiblePosition =
+                            mLinearLayoutManager.findLastCompletelyVisibleItemPosition();
+
+                    if (lastVisiblePosition == -1 ||
+                            (positionStart >= (messageCount - 1) &&
+                                    lastVisiblePosition == (positionStart - 1))) {
+                        mMessageRecyclerView.scrollToPosition(positionStart);
+                    }
+                }
+            });
+
+            mLinearLayoutManager = new LinearLayoutManager(this);
+            mLinearLayoutManager.setStackFromEnd(true);
+            mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
+            mMessageRecyclerView.setAdapter(mFirebaseRecyclerAdapter);
+
+
 
             mAuthStateListener = new FirebaseAuth.AuthStateListener() {
                 @Override
@@ -151,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
         }
+
         @Override
         public void onActivityResult(int requestCode, int resultCode, Intent data){
             super.onActivityResult(requestCode, resultCode, data);
@@ -200,7 +236,6 @@ public class MainActivity extends AppCompatActivity {
             if (mAuthStateListener != null) {
                 mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
             }
-            mMessageAdapter.clear();
             detachDatabaseReadListener();
         }
         @Override
@@ -214,7 +249,6 @@ public class MainActivity extends AppCompatActivity {
         }
         private void onSignedOut(){
             mUsername = ANONYMOUS;
-            mMessageAdapter.clear();
             detachDatabaseReadListener();
         }
         private void attachDatabaseReadListener(){
@@ -223,9 +257,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         Message message = dataSnapshot.getValue(Message.class);
-                        mMessageAdapter.add(message);
                     }
-
                     @Override
                     public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
                     @Override
