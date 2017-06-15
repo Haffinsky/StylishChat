@@ -1,15 +1,20 @@
 package com.example.rafal.stylishchat;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -111,7 +116,8 @@ public class MainActivity extends AppCompatActivity {
                 public void afterTextChanged(Editable editable) {
                 }
             });
-            mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
+            mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter
+                    (DEFAULT_MSG_LENGTH_LIMIT)});
 
             // Send button sends a message and clears the EditText
             mSendButton.setOnClickListener(new View.OnClickListener() {
@@ -127,7 +133,11 @@ public class MainActivity extends AppCompatActivity {
 
             //Initialize recycler view and adapter
             mMessageRecyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
-            mFirebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>(Message.class, R.layout.message, MessageViewHolder.class, mDatabaseReference) {
+            mFirebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>
+                    (Message.class,
+                    R.layout.message,
+                    MessageViewHolder.class,
+                    mDatabaseReference) {
                 @Override
                 protected void populateViewHolder(MessageViewHolder viewHolder, Message model, int position) {
                     Message message = getItem(position);
@@ -257,6 +267,20 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         Message message = dataSnapshot.getValue(Message.class);
+                        FirebaseUser user = mFirebaseAuth.getCurrentUser();
+                        //passing the ID to string
+                        String username = user.getDisplayName();
+                        //getting the author of the message
+                        String author = message.getName();
+
+                        Log.v("Loggity", "current user: " + username + " author of the message: " + author);
+
+                        if (username.equals(author)) {
+                            Log.v("A and u", "same persz");
+                        }
+                            else {
+                            showNotifications(author, message.getText());
+                            }
                     }
                     @Override
                     public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
@@ -276,4 +300,25 @@ public class MainActivity extends AppCompatActivity {
                 mChildEventListener = null;
             }
         }
+    public void showNotifications(String currentUser, String message){
+        Intent mainPerchIntent = new Intent(this, MainActivity.class);
+
+        PendingIntent mainPerchPendingIntent =
+                PendingIntent.getActivity(this, 0,
+                        mainPerchIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        NotificationCompat.Builder builder = new
+                NotificationCompat.Builder(this);
+        builder.setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(currentUser)
+                .setContentText(message);
+        builder.setContentIntent(mainPerchPendingIntent);
+
+
+        Notification notification = builder.build();
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        NotificationManagerCompat.from(this).notify(0, notification);
+        //TODO: show notifications when app is closed
+        //TODO: add current time milis to identify the notification
+    }
     }
