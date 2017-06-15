@@ -276,7 +276,6 @@ public class MainActivity extends AppCompatActivity {
                         Log.v("Loggity", "current user: " + username + " author of the message: " + author);
 
                         if (username.equals(author)) {
-                            Log.v("A and u", "same persz");
                         }
                             else {
                             showNotifications(author, message.getText());
